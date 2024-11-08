@@ -4,33 +4,34 @@
 
 using namespace std;
 
+
 int main(int argc, char* argv[]) {
 
-        int nx(10000);
+        const int nx(10000);            // Changed const, could use a typedef here?
 
-        int ny(200);
+        const int ny(200);
 
-        int nt(200);
+        const int nt(200);
 
         double** vi=new double*[nx];
 
         double** vr=new double*[nx];
 
-        double pi=(4.*atan(1.));
+        const double pi=(4.*atan(1.));
 
-        for(int i=0;i<nx;i++) {
+        for(int i=0;i<nx;++i) {
 
                 vi[i]=new double[ny];
 
                 vr[i]=new double[ny];
 
         }
+        const double pi_over_nx = pi/double(nx);         
+        for(int i=0;i<nx;++i) {
 
-        for(int i=0;i<nx;i++) {
+                for(int j=0;j<ny;++j) {
 
-                for(int j=0;j<ny;j++) {
-
-                        vi[i][j]=double(i*i)*double(j)*sin(pi/double(nx)*double(i));
+                        vi[i][j]=double(i*i)*double(j)*sin(pi_over_nx*double(i));
 
                         vr[i][j]=0.;
                 }
@@ -39,13 +40,13 @@ int main(int argc, char* argv[]) {
 
         ofstream fout("data_out");
 
-        for(int t=0;t<nt;t++) {
+        for(int t=0;t<nt;++t) {
 
                 cout<<"\n"<<t;cout.flush();
 
-                for(int i=0;i<nx;i++) {
+                for(int i=0;i<nx;++i) {
 
-                        for(int j=0;j<ny;j++) {
+                        for(int j=0;j<ny;++j) {
 
                                 if(i>0&&i<nx-1&&j>0&&j<ny-1) {
 
@@ -71,18 +72,18 @@ int main(int argc, char* argv[]) {
                         }
                 }
 
-                for(int i=0;i<nx;i++) {
+                for(int i=0;i<nx;++i) {
 
-                        for(int j=0;j<ny;j++) {
+                        for(int j=0;j<ny;++j) {
 
                                 if(fabs(fabs(vr[i][j])-fabs(vi[i][j]))<1e-2) fout<<"\n"<<t<<" "<<i<<" "<<j<<" "<<fabs(vi[i][j])<<" "<<fabs(vr[i][j]);
 
                         }
                 }
 
-                for(int i=0;i<nx;i++) {
+                for(int i=0;i<nx;++i) {
 
-                        for(int j=0;j<ny;j++) vi[i][j]=vi[i][j]/2.+vr[i][j]/2.;
+                        for(int j=0;j<ny;++j) vi[i][j]=vi[i][j]/2.+vr[i][j]/2.;
 
                 }
         }

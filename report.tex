@@ -1,29 +1,32 @@
-\documentclass[12pt]{report}
+\documentclass[11pt]{report}
 
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{hyperref}
 \usepackage{geometry}
 \usepackage{listings}
+\usepackage{xcolor}
 \geometry{a4paper, margin=0.3in}
+
 
 \begin{document}
 \begin{lstlisting}[language=C++, caption=Original code listing]
 int main(int argc, char* argv[]) {
-    int nx(10000), ny(200), nt(200);
+    int nx(10000), ny(200), nt(200);        
     double** vi=new double*[nx];
     double** vr=new double*[nx];
-    double pi=(4.*atan(1.));
+    double pi=(4.*atan(1.));        Constant here? Could use M_PI 
+                                    Direct initialization?
 
-    for(int i=0;i<nx;i++) {
-        vi[i]=new double[ny];
-        vr[i]=new double[ny];
+    for(int i=0;i<nx;i++) {         Should probably change the operation order 
+        vi[i]=new double[ny];       here with the self incrementation ie. ++i
+        vr[i]=new double[ny];       instead of ++i. 
     }
-
-    for(int i=0;i<nx;i++) {
-        for(int j=0;j<ny;j++) {
-            vi[i][j]=double(i*i)*double(j)*sin(pi/double(nx)*double(i));
-            vr[i][j]=0.;
+                                    Cache thrashing? Try offsetting
+    for(int i=0;i<nx;i++) {         the memory access pattern 
+        for(int j=0;j<ny;j++) {       
+            vi[i][j]=double(i*i)*double(j)*sin(pi/double(nx)*double(i));  pi/double(nx) x
+            vr[i][j]=0.;                                                  in the loop is inefficient
         }
     }
 
@@ -62,5 +65,12 @@ int main(int argc, char* argv[]) {
 }
 \end{lstlisting}
 
+My initial changes consisted of:
+\begin{itemize}
+    \item Changing the operation order in the for loop to use the pre-increment operator instead of the post-increment operator.
+    \item Initialized pi as a constant double.
+    \item Ln 28: Removed unnecessary recalculation of $pi / double(nx)$.
+\end{itemize}
+First run after these changes shaved almost 3 full seconds from the initial run-time however this doesn't seem to be a consistent result.
 
 \end{document}
