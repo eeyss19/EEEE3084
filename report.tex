@@ -25,8 +25,8 @@ int main(int argc, char* argv[]) {
                                     Cache thrashing? Try offsetting
     for(int i=0;i<nx;i++) {         the memory access pattern 
         for(int j=0;j<ny;j++) {       
-            vi[i][j]=double(i*i)*double(j)*sin(pi/double(nx)*double(i));  pi/double(nx) x
-            vr[i][j]=0.;                                                  in the loop is inefficient
+            vi[i][j]=double(i*i)*double(j)*sin(pi/double(nx)*double(i));  
+            vr[i][j]=0.;     // pi/double(nx) in the loop is inefficient //
         }
     }
 
@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
     }
 }
 \end{lstlisting}
-
+\vspace{20cm}
 My initial changes consisted of:
 \begin{itemize}
     \item Changing the operation order in the for loop to use the pre-increment operator instead of the post-increment operator.
