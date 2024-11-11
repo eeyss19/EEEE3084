@@ -2,6 +2,7 @@
 #include <fstream>
 #include <math.h>
 #include <cstring>
+#include <sys/time.h>
 
 using namespace std;
 
@@ -21,14 +22,14 @@ static constexpr int nt = 200;
 allData() {
         vi = new double*[nx];
         vr = new double*[nx];
-        for(int i=0;i<nx;++i) {
+        for(i=0;i<nx;++i) {
                 vi[i]=new double[ny];                                    
                 vr[i]=new double[ny];
         }
 }
 
 ~allData() {
-        for(int i=0;i<nx;++i) {
+        for(i=0;i<nx;++i) {
                 delete[] vi[i];
                 delete[] vr[i];
         }
@@ -38,12 +39,14 @@ allData() {
 
 };
 
+struct timeval start, endTime;
+
 int main(int argc, char* argv[]) {
 
+        gettimeofday(&start, NULL);
         allData data;
-        cout<<"\nSize of baseArgs = "<<sizeof(allData)<<" bytes";
-        
-          
+        // cout<<"\nSize of baseArgs = "<<sizeof(allData)<<" bytes";     
+
         for(data.i=0;data.i<data.nx;++data.i) {
                 const double constant(double(data.i*data.i)*sin(data.pi_over_nx*double(data.i)));
                 for(data.j=0;data.j<data.ny;++data.j) {
@@ -81,8 +84,8 @@ int main(int argc, char* argv[]) {
                 
                 for(data.i=0;data.i<data.nx;++data.i) {
 
-                        for(data.j=0;data.j<data.ny;++data.j) {                               // Tried loop unrolling but the duplication of if statements kills the runtime
-                                                                                        // Calculating the absolute values slowed it by almsot a second
+                        for(data.j=0;data.j<data.ny;++data.j) {                                 // Tried loop unrolling but the duplication of if statements kills the runtime
+                                                                                                // Calculating the absolute values slowed it by almsot a second
                                 const double valvr(fabs(data.vr[data.i][data.j]));
                                 const double valvi(fabs(data.vi[data.i][data.j]));
                                 if(fabs(valvr-valvi)<1e-2) fout<<"\n"<<data.t<<" "<<data.i<<" "<<data.j<<" "<<valvi<<" "<<valvr; 
@@ -90,5 +93,7 @@ int main(int argc, char* argv[]) {
                         }
                 }
         }
+        gettimeofday(&endTime, NULL);
+        cout << "\nTime taken = " << ((endTime.tv_sec - start.tv_sec) + (endTime.tv_usec - start.tv_usec) / 1e6) << " seconds";
 }
 
