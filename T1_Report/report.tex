@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
                     to multiplication by 0.5
 \end{lstlisting}
 \vspace{1cm}
-As well as the general bad practice shown in the above block it is clear that no cache awareness has influenced the design and structure of the code. Repeated unnecessary function calls, cache thrashing and redundant branching all contributes to the degredation of the performance of the code. The following block of code shows my attempt at addressing these issues as well as anything else I may have spotted.
+As well the numerous examples of bad practice shown above, it is abundantly clear that little/no effort has been made to consider the memory structure and hardware architecture of the platform. Repeated unnecessary function calls, cache thrashing and redundant branching are just some of the issues addressed in my optimised solution below.
 
 
 
@@ -77,25 +77,26 @@ As well as the general bad practice shown in the above block it is clear that no
 #include <fstream>
 #include <math.h>
 #include <cstring>
-#include <sys/time.h>
+#include <sys/time.h>   Added to facilitate using the MSYS terminal,
+                         also more accurate than default VSC settings
 
 using namespace std;
 
-struct allData { 
-double** vi;
-double** vr;
-const double pi_over_nx = M_PI/double(nx);
+struct allData {        Struct to ensure all data is stored contiguously in memory
+double** vi;            Attempt to reduce cache thrashing and improve memory access pattern
+double** vr;            
+const double pi_over_nx = M_PI/double(nx);     Ordered data largest -> smallest 
+                                               to optimize cache usuage
+int i, j, t;                       
 
-int i, j, t;
-
-static constexpr double dividebyfour = 0.25;
-static constexpr double dividebytwo = 0.5;
+static constexpr double dividebyfour = 0.25;   Memory efficient way to store constants
+static constexpr double dividebytwo = 0.5;     Compile time constants
 static constexpr int nx = 10000;
 static constexpr int ny = 200;
 static constexpr int nt = 200;
 
 allData() {
-        vi = new double*[nx];
+        vi = new double*[nx];       
         vr = new double*[nx];
         for(i=0;i<nx;++i) {
                 vi[i]=new double[ny];                                    
@@ -103,8 +104,8 @@ allData() {
         }
 }
 
-~allData() {
-        for(i=0;i<nx;++i) {
+~allData() {                    Destructor should always be declared
+        for(i=0;i<nx;++i) {     especially when using dynamic memory allocation
                 delete[] vi[i];
                 delete[] vr[i];
         }
@@ -120,7 +121,7 @@ int main(int argc, char* argv[]) {
 
 gettimeofday(&start, NULL);
 allData data;
-
+                                            Cut down on repeated calculations
 for(data.i=0;data.i<data.nx;++data.i) {
 const double constant(double(data.i*data.i)*sin(data.pi_over_nx*double(data.i)));
 for(data.j=0;data.j<data.ny;++data.j) {
@@ -133,10 +134,14 @@ ofstream fout("data_out");
                 
 for(data.t=0;data.t<data.nt;++data.t) {                                               
                                                                                 
-cout<<"\n"<<data.t;cout.flush();                                          
+cout<<"\n"<<data.t;cout.flush();        Replaced branching logic all together                                     
+                                            massively reduced the run-time.
 
-for(data.i=1;data.i<data.nx-1;++data.i) {
-    data.vr[data.i][0]=(data.vi[data.i+1][0]+data.vi[data.i-1][0]+
+
+
+
+for(data.i=1;data.i<data.nx-1;++data.i) {                               
+    data.vr[data.i][0]=(data.vi[data.i+1][0]+data.vi[data.i-1][0]+      
                         15.45+data.vi[data.i][1])*data.dividebyfour;
     data.vr[data.i][199]=(data.vi[data.i+1][199]+
                           data.vi[data.i-1][199]+
@@ -158,24 +163,36 @@ for(data.j=1;data.j<data.ny-1;++data.j) {
                            data.vi[9999][data.j+1])*data.dividebyfour;
 }
                 
+                                        fabs() function is called only once 
 for(data.i=0;data.i<data.nx;++data.i) {
-
 for(data.j=0;data.j<data.ny;++data.j) {                                 
-    const double valvr(fabs(data.vr[data.i][data.j]));
+    const double valvr(fabs(data.vr[data.i][data.j]));  
     const double valvi(fabs(data.vi[data.i][data.j]));
     if(fabs(valvr-valvi)<1e-2) 
     fout<<"\n"<<data.t<<" "<<data.i<<" "<<data.j<<" "<<valvi<<" "<<valvr;
  
-    data.vi[data.i][data.j]=(data.vi[data.i][data.j]*
-    data.dividebytwo)+(data.vr[data.i][data.j]*data.dividebytwo);
-        }
-    }
-}
+    data.vi[data.i][data.j]=(data.vi[data.i][data.j]*   
+    data.dividebytwo)+(data.vr[data.i][data.j]*data.dividebytwo);  
+        }       
+    }              This final calculation has been appended to the end of this loop
+}                       multiplication is faster than division
+
 gettimeofday(&endTime, NULL);
 cout << "\nTime taken = " << ((endTime.tv_sec - start.tv_sec) +
          (endTime.tv_usec - start.tv_usec) / 1e6) << " seconds";
 }
 \end{lstlisting}
+\vspace{0.5cm}
+During the optimization process, I tried many different approaches and methods to reduce the run-time. Few of which made the final cut because ultimately they were not very influential on the overall performance. I would've known this if I profiled my code appropriately before starting so I could focus on the most time-consuming parts, although in this very simple example code it was quite clear that the primary bottleneck on performance would be the heavy use of branch logic and multiple conditional blocks that composed the main numerical body of the program.
+
+\vspace{0.25cm}
+Some of the more notable efforts I made that were not included in the final code were: Loop unrolling the final calculation, using multiple structs to store the data (cache locality?), Memset and similar functions for allocation, counting down in loops, the bitshift operator. All of these methods either had no effect or made the code less readable and harder to maintain.
+
+\vspace{0.25cm}
+I believe the two most significant changes which influenced the performance were the removal of the branching logic and the use of a struct to store all the data. The struct allowed for contiguous memory access and by extention reduced cache thrashing and misses. Altering the logic to remove branching also noticably increased the performance as the compiler was likely able to make better use of the CPU's branch prediction and pipelining capabilities.
+
+\vspace{0.25cm}
+The average runtime now sits at around 1.35 seconds on my machine, my optimised solution appears to consistently perform about 20--30\% faster than the original code, even with the compiler fully optimized (-O3). I am confident that with more time and effort I could further improve the performance of this code, but I am happy with the results I have achieved so far. One thing I would be eager to try is to experiment more with 'constexpr' and see how far I can push the compiler to reduce the runtime even further.
 
 
 
