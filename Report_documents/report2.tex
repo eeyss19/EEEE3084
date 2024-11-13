@@ -1,0 +1,62 @@
+\documentclass[10pt]{report}
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+\geometry{a4paper, margin=0.5in}
+
+
+\begin{document}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.7\textwidth]{cacheAccessGraph.png}
+    \caption{Cache Access Graph}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.7\textwidth]{OffsetRuntime.png}
+    \caption{Offset Runtime Graph}
+\end{figure}
+
+\newpage
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.7\textwidth]{OpenMPcacheAccess.png}
+    \caption{OpenMP parallelization of Cache Access Graph}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.7\textwidth]{ompOffsetRuntime.png}
+    \caption{OpenMP parallelization of Offset Runtime Graph}
+\end{figure}
+
+\newpage
+\begin{center}
+Static scheduling: for n = 10000 and offset = 0, average wall time = 4.33937 seconds \\
+Dynamic scheduling: for n = 10000 and offset = 0, average wall time = 4.07078 seconds \\
+Static scheduling: for n = 20000 and offset = 0, average wall time = 8.41641 seconds \\
+Dynamic scheduling: for n = 20000 and offset = 0, average wall time = 7.85249 seconds \\
+Static scheduling: for n = 40000 and offset = 0, average wall time = 16.8527 seconds \\
+Dynamic scheduling: for n = 40000 and offset = 0, average wall time = 15.513 seconds \\
+Static scheduling: for n = 80000 and offset = 0, average wall time = 33.5009 seconds \\
+Dynamic scheduling: for n = 80000 and offset = 0, average wall time = 30.8159 seconds \\
+Static scheduling: for n = 160000 and offset = 0, average wall time = 66.8501 seconds \\
+Dynamic scheduling: for n = 160000 and offset = 0, average wall time = 61.3558 seconds \\
+
+Total time with dynamic scheduling = 11.9608 seconds \\
+Total time with static scheduling = 12.996 seconds \\
+\end{center}
+
+\section{Discussion}
+Example text 
+
+
+
+\end{document}
