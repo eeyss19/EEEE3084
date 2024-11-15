@@ -21,7 +21,7 @@ double i_dependent_fn(int i){       // Dependent on i to simulate operations not
 int main() {
     std::ofstream outfile("task_two_output.csv");
     // const int max_offset = 1024;
-    const int max_n(1000000);
+    const int max_n(2000000);
     const int offset(0);
     const int num_repeats(10); 
 
@@ -30,10 +30,9 @@ int main() {
 
     // omp_set_num_threads(6);
 
-
-    int i, repeat, n;
+    int n, i, repeat;
     
-    for (n = 1000; n <= max_n; n *= 2) { 
+    for (n = 2; n <= max_n; n *= 2) { 
     // for(int offset = 1; offset <= max_offset; offset *= 2) {
         double *a = new double[n];
         double *b = new double[n];
@@ -52,7 +51,7 @@ int main() {
                     // a[i] = b[i] + c[i + offset] + i_dependent_fn(i); 
                     }
                 }
-                
+
         gettimeofday(&end_time, NULL); 
 
         double elapsed_time_static = (end_time.tv_sec - start_time.tv_sec) +            // Time for the nested loops, for increased accuracy
@@ -61,10 +60,12 @@ int main() {
         cout<< "Static scheduling: for n = " << n << " and offset = " << offset <<", average wall time = " << time_per_iteration_static << " seconds" << endl;
         total_time_static += time_per_iteration_static;
 
-        outfile << n << "," << time_per_iteration_static << endl;
+        // n is the amount of doubles per array, 8 bytes per double, n->kB = n * 8 / 1024
+        double n_kB = n * 8 / 1024;
+        outfile << n_kB << "," << time_per_iteration_static << endl;
 
 
-        // gettimeofday(&start_time, NULL); 
+        // gettimeofday(&start_time, NULL);
         // for (int repeat = 0 ; repeat < num_repeats; repeat++) {
         //         #pragma omp parallel for schedule(dynamic, 100) private(i)
         //         for (i = 0; i < (n - offset); i++) {
