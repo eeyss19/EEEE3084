@@ -19,9 +19,10 @@ double i_dependent_fn(int i){       // Dependent on i to simulate operations not
 }
 
 int main() {
-    std::ofstream outfile("task_two_output.csv");
-    // const int max_offset = 1024;
-    const int max_n(2000000);
+    std::ofstream outfile("task_two_output_offset1408kB.csv");
+    outfile << "Offset,Runtime (s),Runtime Difference (s)\n";
+    const int max_offset = 10;
+    // const int max_n(4*1024*1024);
     const int offset(0);
     const int num_repeats(10); 
 
@@ -30,10 +31,13 @@ int main() {
 
     // omp_set_num_threads(6);
 
-    int n, i, repeat;
+    const int n = 180224;
+    int i, repeat;
+    double last_time = 0.0;
     
-    for (n = 2; n <= max_n; n *= 2) { 
-    // for(int offset = 1; offset <= max_offset; offset *= 2) {
+    // for (n = 1024; n <= max_n; n*=2) { 
+    // for (n = 0; n <= 2000000; n += (n < 49152 ? 512 : n < 196608 ? 4096 : n < 1572864 ? 16384 : 65536)) {
+    for(int offset = 0; offset < max_offset; offset++) {
         double *a = new double[n];
         double *b = new double[n];
         double *c = new double[n + offset];
@@ -57,12 +61,17 @@ int main() {
         double elapsed_time_static = (end_time.tv_sec - start_time.tv_sec) +            // Time for the nested loops, for increased accuracy
                                      (end_time.tv_usec - start_time.tv_usec) / 1e6;
         double time_per_iteration_static = elapsed_time_static / num_repeats;           // Normalised time per iteration
+        
         cout<< "Static scheduling: for n = " << n << " and offset = " << offset <<", average wall time = " << time_per_iteration_static << " seconds" << endl;
         total_time_static += time_per_iteration_static;
+        double time_per_iteration_static_difference = time_per_iteration_static - last_time;
+        last_time = time_per_iteration_static;
 
         // n is the amount of doubles per array, 8 bytes per double, n->kB = n * 8 / 1024
-        double n_kB = n * 8 / 1024;
-        outfile << n_kB << "," << time_per_iteration_static << endl;
+        double n_kB = n * 8 / 1024.0;
+        // outfile << n_kB << "," << time_per_iteration_static<< "," << time_per_iteration_static_difference << "\n";
+        outfile << offset << "," << time_per_iteration_static<< "," << time_per_iteration_static_difference << "\n";
+
 
 
         // gettimeofday(&start_time, NULL);
